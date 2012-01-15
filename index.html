@@ -1,0 +1,48 @@
+<!doctype html>
+<html>
+
+<head>
+<title>QR Code</title>
+</head>
+
+<body bgcolor="#aaa">
+
+<form id="form">
+<textarea id="msg">test</textarea><br />
+Render: <select id="render">
+	<option>canvas</option>
+	<option>svg</option>
+	<option>div</option>
+</select><br />
+Background: <input type="color" id="bgcolor" value="#fff" /><br />
+Foreground: <input type="color" id="fgcolor" value="#000" /><br />
+Margin: <input type="number" id="margin" value="10" /><br />
+<input type="submit" value="update" id="update" />
+</form>
+<div id="qr"></div>
+
+<script src="http://code.jquery.com/jquery-latest.min.js"></script>
+<script src="jquery.qrcode.min.js"></script>
+<script>
+$(document).ready(function() {
+	var qr = $('#qr').qrcode('opusonline.at', 'url');
+	var msg = $('#msg');
+	var rnd = $('#render');
+	var bcl = $('#bgcolor');
+	var fcl = $('#fgcolor');
+	var mrg = $('#margin');
+	$('#form').submit(function() {
+		var text = msg.val();
+		var render = rnd.val();
+		var margin = Number(mrg.val());
+		var bgcolor = bcl.val();
+		var fgcolor = fcl.val();
+		qr.qrcode({text: text, render: render, bgColor: bgcolor, fgColor: fgcolor, margin: margin});
+		return false;
+	});
+});
+</script>
+
+</body>
+
+</html>
