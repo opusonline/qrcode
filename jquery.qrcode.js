@@ -153,6 +153,19 @@ var qrcode=function(){var n=function(B,r){var J=236;var I=17;var v=B;var x=i[r];
 				options.type = arguments[1];
 			}
 		}
+		if (options.type == 'url') {
+			options.text = 'http://' + options.text.replace(/^http:\/\//i, '');
+		}
+		else if (options.type == 'email') {
+			options.text = 'mailto:' + options.text.replace(/^mailto:/i, '');
+		}
+		else if (options.type == 'tel') {
+			options.text = 'tel:' + options.text.replace(/^tel:/i, '');
+		}
+		else if (options.type == 'sms') {
+			options.text = 'smsto:' + options.text.replace(/^smsto:/i, '');
+		}
+			
 		options = $.extend({}, defaults, options);
 		
 		return this.each(function() {
@@ -169,20 +182,8 @@ var qrcode=function(){var n=function(B,r){var J=236;var I=17;var v=B;var x=i[r];
 				var modules = qr.getModuleCount();
 				options.size = Math.round(options.size / modules) * modules;
 			}
-			if (options.type == 'url') {
-				options.text = 'http://' + options.text.replace('http://', '');
-			}
-			else if (options.type == 'email') {
-				options.text = 'mailto:' + options.text.replace('mailto:', '');
-			}
-			else if (options.type == 'tel') {
-				options.text = 'tel:' + options.text.replace('tel:', '');
-			}
-			else if (options.type == 'sms') {
-				options.text = 'sms:' + options.text.replace('sms:', '');
-			}
 			
-			var element = createFunctions[options.render].call(qr, options.size, options.margin, options.bgColor, options.fgColor);
+			var element = createFunctions[options.render].call(qr, options.size, Number(options.margin), options.bgColor, options.fgColor);
 			me.innerHTML = '';
 			me.appendChild(element);
 		});
