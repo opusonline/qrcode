@@ -18,7 +18,7 @@ var qrcode=function(){var n=function(B,r){var J=236;var I=17;var v=B;var x=i[r];
 
 /*!
  * jquery qrcode plugin
- * Copyright 2011, Stefan Benicke (opusonline.at)
+ * Copyright 2012, Stefan Benicke (opusonline.at)
  * Dual licensed under the MIT or GPL Version 3 licenses.
  *
  * qrcode errorCorrectLevel:
@@ -26,11 +26,11 @@ var qrcode=function(){var n=function(B,r){var J=236;var I=17;var v=B;var x=i[r];
  * Level M	Approx. 15% of codewords can be restored.
  * Level Q	Approx. 25% of codewords can be restored.
  * Level H	Approx. 30% of codewords can be restored.
+ * Default L. (Use higher level only if parts are realy destructed)
  *  
  * qrcode version:
  * Higher the version number, more data can be stored (max 976-2192 bits, depends on error correction level).
- * Default 4. (See http://www.denso-wave.com/qrcode/vertable1-e.html)
- * 
+ * Default 1. (See http://www.denso-wave.com/qrcode/vertable1-e.html)
  */
 (function($) {
 		
@@ -42,8 +42,8 @@ var qrcode=function(){var n=function(B,r){var J=236;var I=17;var v=B;var x=i[r];
 		render: 'canvas', // 'svg', 'div'
 		bgColor: '#fff',
 		fgColor: '#000',
-		version: 4, // 1 - 10
-		errorCorrectLevel: 'M' // 'L', 'M', 'Q', 'H'
+		version: 1, // 1 - 10
+		errorCorrectLevel: 'L' // 'L', 'M', 'Q', 'H'
 	},
 	
 	width = 'width',
@@ -163,17 +163,32 @@ var qrcode=function(){var n=function(B,r){var J=236;var I=17;var v=B;var x=i[r];
 			options.text = 'tel:' + options.text.replace(/^tel:/i, '');
 		}
 		else if (options.type == 'sms') {
+			// TODO: add text like SMSTO:012345:TEXT
 			options.text = 'smsto:' + options.text.replace(/^smsto:/i, '');
 		}
+		// utf-8 encode
+		options.text = unescape(encodeURIComponent(options.text));
 			
 		options = $.extend({}, defaults, options);
 		
-		return this.each(function() {
+		var create = function() {
 			
-			var me = this,
-			qr = qrcode(options.version, options.errorCorrectLevel);
-			qr.addData(options.text);
-			qr.make();
+			var me = this;
+			var qr;
+			try {
+				qr = qrcode(options.version, options.errorCorrectLevel);
+				qr.addData(options.text);
+				qr.make();
+			} catch (err) {
+				// automatically increment version if it is too small
+				if (options.version < 40) {
+					options.version++;
+					create.call(me);
+					return;
+				} else {
+					throw err;
+				}
+			}
 			
 			if ( ! createFunctions[options.render]) {
 				options.render = 'div';
@@ -186,7 +201,9 @@ var qrcode=function(){var n=function(B,r){var J=236;var I=17;var v=B;var x=i[r];
 			var element = createFunctions[options.render].call(qr, options.size, Number(options.margin), options.bgColor, options.fgColor);
 			me.innerHTML = '';
 			me.appendChild(element);
-		});
+		};
+		
+		return this.each(create);
 	};
 	
 })(jQuery);
